@@ -2,7 +2,7 @@
     padding: 5%;
 
     .child_container{
-        padding-top: 5%;
+        padding-top: 3%;
         width: 100%;
     }
 }
@@ -12,5 +12,29 @@
 }
 
 .btn{
-    margin: 0 1%;
+    margin: 1%;
+}
+
+.close_btn{
+    margin: 1%;
+}
+
+.require{
+    color: #F44336;
+}
+
+.upload_btn{
+    border-radius: 4px;
+}
+
+.preview_upload_wrapper{
+    margin-top: 2%;
+
+    .preview_upload{
+        margin: 1%;
+    }    
+}
+
+.next_Step_wrapper{
+    float: right;
 }

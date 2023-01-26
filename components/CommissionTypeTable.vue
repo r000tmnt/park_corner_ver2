@@ -7,11 +7,17 @@
      :custom-filter="filterOnlyCapsText"
     >
       <template v-slot:top>
-        <v-text-field
-          v-model="search"
-          label="Search"
-          class="mx-4"
-        ></v-text-field>
+
+        <div class="flex">
+          <v-btn class="btn" color="primary" @click="addNewType = true">Add new type</v-btn>
+
+          <v-text-field
+            v-model="search"
+            label="Search"
+            class="mx-4"
+          ></v-text-field>
+        </div>
+
       </template>
 
       {{/* Need to customize the first col to display thumbnail */}}
@@ -22,12 +28,16 @@
 
       <template v-slot:item.control="props">
           <div class="flex">
-            <v-btn class="btn">Edit</v-btn>
-            <v-btn class="btn">Remove</v-btn>
+            <v-btn class="btn" color="teal darken-2">Edit</v-btn>
+            <v-btn class="btn" color="red darken-2">Remove</v-btn>
           </div>  
       </template>
 
     </v-data-table>
+
+    {{/* form */}}
+    <AddNewType :addNewType="addNewType" v-on:close="closeAddNewModal(value)" />
+
   </div>
 </template>
 
@@ -36,6 +46,8 @@
     data () {
       return {
         search: '',
+        addNewType: false,
+        editType: false,
         headers: [
           {
             text: '',
@@ -65,6 +77,18 @@
             price: 400
           },
         ],
+      }
+    },
+    methods: {
+      filterOnlyCapsText (value, search, item) {
+        return value != null &&
+          search != null &&
+          typeof value === 'string' &&
+          value.toString().toLocaleUpperCase().indexOf(search) !== -1
+      },
+
+      closeAddNewModal(value){
+        this.addNewType = value
       }
     },
   }
