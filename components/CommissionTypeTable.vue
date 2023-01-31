@@ -9,7 +9,7 @@
       <template v-slot:top>
 
         <div class="flex">
-          <v-btn class="btn" color="primary" @click="addNewType = true">Add new type</v-btn>
+          <v-btn style="margin: 1%" color="primary" @click="addNewType = true">Add new type</v-btn>
 
           <v-text-field
             v-model="search"
