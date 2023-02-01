@@ -1,11 +1,13 @@
 import express from 'express';
 import test from '../route/test';
+import commissionType from '../route/commission_type'
 
 const app = express();
 
 app.use(express.json());
 
 app.use('/test', test)
+app.use('/commission', commissionType)
 
 module.exports = app
 

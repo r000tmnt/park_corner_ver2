@@ -129,7 +129,17 @@
                                     max-height="100"
                                     :src="thumbnails[index]"
                                     class="preview_upload"
-                                ></v-img>
+                                >
+                                    <v-btn 
+                                        style="float: right"
+                                        @click="removeImage(index)"
+                                        icon
+                                    >
+                                        <v-icon>
+                                            mdi-close
+                                        </v-icon>
+                                    </v-btn>                                
+                                </v-img>
                             </div>
                         </v-col>
 
@@ -299,17 +309,6 @@ export default {
             }
         }
     },
-    computed: {
-        form(){
-            return {
-                zh_name: this.type_name_zh,
-                eng_name: this.type_name_eng,
-                images: this.newImages,
-                acceptable: this.type_acceptable,
-                price: this.type_price
-            }
-        }
-    },
     methods: {
         onUploadBtnClick(){
             this.$refs.imgUploader.click()
@@ -336,6 +335,11 @@ export default {
             }
         },
 
+        removeImage(index){
+            this.newImages.splice(index, 1)
+            this.thumbnails.splice(index, 1)
+        },
+
         addNewVariation(){
 
             this.variation.push({
@@ -352,7 +356,7 @@ export default {
             this.variation.splice(index, 1)
         },
 
-        fieldCheck(){
+        async fieldCheck(){
 
             let matchRules
 
@@ -370,10 +374,22 @@ export default {
                 case 3:
                     matchRules = this.$refs.step_3.validate()
                     if(matchRules){
-                        console.log('form :>>>', this.form)
+                        let form = new FormData()
+                        form.append('zh_name', this.type_name_zh)
+                        form.append('eng_name', this.type_name_eng)
+                        form.append('acceptable', this.type_acceptable)
+                        form.append('price', this.type_price)
+                        form.append('images', this.newImages)
+                        form.append('variation', this.variation)
+                        form.append('zh_desc', this.zh_desc)
+                        form.append('eng_desc', this.eng_desc)
 
-                        // form submit
-                        axios.post('/add', this.form)
+                        try {
+                            // form submit
+                            await axios.post('/commission/add', form)                            
+                        } catch (error) {
+                            console.log('form_submit_error :>>>', error)   
+                        }
                     } 
                 return
             }
