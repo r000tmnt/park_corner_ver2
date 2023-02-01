@@ -379,10 +379,13 @@ export default {
                         form.append('eng_name', this.type_name_eng)
                         form.append('acceptable', this.type_acceptable)
                         form.append('price', this.type_price)
-                        form.append('images', this.newImages)
                         form.append('variation', this.variation)
                         form.append('zh_desc', this.zh_desc)
                         form.append('eng_desc', this.eng_desc)
+
+                        for(let i=0; i < this.newImages.length; i++){
+                            form.append(`files[${i}]`, this.newImages[i])
+                        }
 
                         try {
                             // form submit
