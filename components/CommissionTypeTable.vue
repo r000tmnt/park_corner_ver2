@@ -36,7 +36,7 @@
     </v-data-table>
 
     {{/* form */}}
-    <AddNewType :addNewType="addNewType" v-on:close="closeAddNewModal(value)" />
+    <AddNewType :addNewType="addNewType" v-on:close="closeAddNewModal()" />
 
   </div>
 </template>
@@ -87,8 +87,8 @@
           value.toString().toLocaleUpperCase().indexOf(search) !== -1
       },
 
-      closeAddNewModal(value){
-        this.addNewType = value
+      closeAddNewModal(){
+        this.addNewType = false
       }
     },
   }

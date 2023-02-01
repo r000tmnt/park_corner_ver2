@@ -35,7 +35,7 @@
             <v-btn 
                 icon
                 class="close_btn"
-                @click="$emit('close', !addNewType)"
+                @click="$emit('close')"
             >
                 <v-icon>
                     mdi-close
@@ -105,7 +105,7 @@
 
                             <v-alert
                                 text
-                                v-if="alert"
+                                v-if="img_alert"
                                 type="error"
                             >
                                 Reached file limit
@@ -144,12 +144,82 @@
 
             <v-stepper-content step="2">
                 <v-form ref="step_2">
-                    <v-row style="margin-top: 1%">
+                    <v-row>
                         <v-col cols="12">
 
-                            <v-card v-for="(vari, index) in variation" v-bind:key="index"></v-card>
+                            <v-btn block color="blue-grey" @click="addNewVariation">新增類型變化</v-btn>
 
-                            <v-btn block>新增類型變化</v-btn>
+                            <v-card class="card" v-for="(vari, index) in variation" v-bind:key="index">
+                                
+                                <v-row>
+                                    <v-col cols="12" >
+
+                                        <span>類型變化</span>
+
+                                        <v-btn 
+                                            icon
+                                            class=""
+                                            style="float: right"
+                                            @click="removeVariation(index)"
+                                        >
+                                            <v-icon>
+                                                mdi-close
+                                            </v-icon>
+                                        </v-btn>                                          
+                                    </v-col>                                    
+                                </v-row>
+
+                                <v-row>
+                                    <v-col cols="6">
+                                        <v-text-field
+                                            label="中文名稱"
+                                            :rules="[value => vari.zh_name.length > 0 || !!value || 'Required']"
+                                            v-model="vari.zh_name"
+                                            outlined                                    
+                                        ></v-text-field>
+
+                                        <v-text-field
+                                            label="英文名稱"
+                                            :rules="[value => vari.zh_name.length > 0 || !!value || 'Required']"
+                                            v-model="vari.eng_name"
+                                            outlined                                   
+                                        ></v-text-field>
+                                            
+                                    </v-col>
+
+                                    <v-col cols="6">
+                                        
+                                        <v-text-field
+                                            label="價格"
+                                            :rules="[
+                                                value => vari.price < type_price || 
+                                                !!value || value < type_price ||
+                                                'Required'
+                                            ]"
+                                            v-model="vari.price"
+                                            :value="vari.price || type_price"
+                                            type="number"
+                                            outlined                                   
+                                        ></v-text-field>                                         
+                                    </v-col>
+
+                                    <v-col cols="12">
+                                        <v-textarea 
+                                            v-model="vari.zh_desc"
+                                            label="中文說明"
+                                            :rules="[value => vari.zh_desc.length > 0 || !!value || 'Required']"
+                                            outlined
+                                        ></v-textarea>
+
+                                        <v-textarea 
+                                            v-model="vari.eng_desc"
+                                            label="英文說明"
+                                            :rules="[value => vari.eng_desc.length > 0 || !!value || 'Required']"
+                                            outlined
+                                        ></v-textarea>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
 
                             <center v-if="variation.length == 0" style="margin: 3% 0">想想可以有什麼變化</center>
 
@@ -162,7 +232,35 @@
                     </div>
                 </v-form>
 
-            </v-stepper-content>            
+            </v-stepper-content>     
+
+            <v-stepper-content step="3">
+                <v-form ref="step_3">
+                    <v-row>
+                        <v-col cols="12">
+                            <v-textarea 
+                                v-model="zh_desc"
+                                label="中文說明"
+                                :rules="[value => zh_desc.length > 0 || !!value || 'Required']"
+                                outlined
+                            ></v-textarea>
+
+                            <v-textarea 
+                                v-model="eng_desc"
+                                label="英文說明"
+                                :rules="[value => eng_desc.length > 0 || !!value || 'Required']"
+                                outlined
+                            ></v-textarea>
+                        </v-col>
+                    </v-row>
+
+                    <div class="next_Step_wrapper">
+                        <v-btn color="primary" @click="fieldCheck">Submit</v-btn>                    
+                    </div>
+                </v-form>
+
+            </v-stepper-content> 
+
         </v-stepper-items>
       </v-stepper>
 
@@ -170,6 +268,7 @@
 </template>
 
 <script>
+import axios from '../server/axios.ts'
 
 export default {
     props: {
@@ -178,7 +277,7 @@ export default {
     data(){
         return {
             step: 1,
-            alert: false,
+            img_alert: false,
             newImages: [],
             thumbnails: [],
             type_name_zh: '',
@@ -193,6 +292,8 @@ export default {
             rules: {
                 zh_required: value => this.type_name_zh.length > 0 || !!value || 'Required',
                 eng_required: value => this.type_name_eng.length > 0 || !!value || 'Required',
+                zh_desc_required: value => this.zh_desc.length > 0 || !!value || 'Required',
+                eng_desc_required: value => this.eng_desc.length > 0 || !!value || 'Required',
                 accept: value => this.type_acceptable > 0 || value > 0 || 'Need a number above 0',
                 base_price: value => this.type_price >= 300 || value >= 300 || 'Need a number above 300',
             }
@@ -221,20 +322,34 @@ export default {
 
             for(let i=0; i < files.length; i++){
                 if(this.newImages.length == 5){
-                    this.alert = true
+                    this.img_alert = true
 
                     setTimeout(() => {
-                        this.alert = false
+                        this.img_alert = false
                     }, 1000)
 
                     break
                 }else{
                     this.newImages.push(files[i])
                     this.thumbnails.push(URL.createObjectURL(files[i]))
-
-                    // this.alert = false
                 }
             }
+        },
+
+        addNewVariation(){
+
+            this.variation.push({
+                zh_name: '', 
+                eng_name: '', 
+                price: this.type_price, 
+                zh_desc: '', 
+                eng_desc: ''
+            })
+
+        },
+
+        removeVariation(index){
+            this.variation.splice(index, 1)
         },
 
         fieldCheck(){
@@ -244,9 +359,23 @@ export default {
             switch(this.step){
                 case 1:
                     matchRules = this.$refs.step_1.validate()
-                    // console.log('matchRules :>>>', matchRules)
                     if(matchRules) this.step = 2
                 return;
+
+                case 2:
+                    matchRules = this.$refs.step_2.validate()
+                    if(matchRules) this.step = 3
+                return;
+                
+                case 3:
+                    matchRules = this.$refs.step_3.validate()
+                    if(matchRules){
+                        console.log('form :>>>', this.form)
+
+                        // form submit
+                        axios.post('/add', this.form)
+                    } 
+                return
             }
 
         }
