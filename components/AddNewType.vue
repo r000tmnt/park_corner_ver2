@@ -54,7 +54,7 @@
                                 label="Name(ZH)"
                                 placeholder="中文名稱"
                                 :rules="[rules.zh_required]"
-                                v-model="type_name_zh"
+                                v-model="newType.zh_name"
                                 outlined
                             >
                             </v-text-field>
@@ -63,7 +63,7 @@
                                 label="Name(ENG)"
                                 placeholder="英文名稱"
                                 :rules="[rules.eng_required]"
-                                v-model="type_name_eng"
+                                v-model="newType.eng_name"
                                 outlined
                             >
                             </v-text-field>
@@ -72,7 +72,7 @@
                                 label="Acceptable"
                                 placeholder="接受數量"
                                 :rules="[rules.accept]"
-                                v-model="type_acceptable"
+                                v-model="newType.acceptable"
                                 type="number"
                                 outlined
                             >
@@ -82,7 +82,7 @@
                                 label="Price"
                                 placeholder="起始價格"
                                 :rules="[rules.base_price]"
-                                v-model="type_price"
+                                v-model="newType.price"
                                 type="number"
                                 outlined
                             >
@@ -116,6 +116,7 @@
                                 type="file"
                                 accept="image/*"
                                 multiple
+                                maxlength="5"
                                 hidden
                                 @change="onFileChange"
                             >
@@ -202,12 +203,12 @@
                                         <v-text-field
                                             label="價格"
                                             :rules="[
-                                                value => vari.price < type_price || 
-                                                !!value || value < type_price ||
+                                                value => vari.price < newType.price || 
+                                                !!value || value < newType.price ||
                                                 'Required'
                                             ]"
                                             v-model="vari.price"
-                                            :value="vari.price || type_price"
+                                            :value="vari.price || newType.price"
                                             type="number"
                                             outlined                                   
                                         ></v-text-field>                                         
@@ -238,6 +239,7 @@
                     </v-row>
 
                     <div class="next_Step_wrapper">
+                        <v-btn color="secondary" @click="step = step - 1">Prev</v-btn>
                         <v-btn color="primary" @click="fieldCheck">Next</v-btn>                    
                     </div>
                 </v-form>
@@ -249,23 +251,24 @@
                     <v-row>
                         <v-col cols="12">
                             <v-textarea 
-                                v-model="zh_desc"
+                                v-model="newType.zh_desc"
                                 label="中文說明"
-                                :rules="[value => zh_desc.length > 0 || !!value || 'Required']"
+                                :rules="[value => newType.zh_desc.length > 0 || !!value || 'Required']"
                                 outlined
                             ></v-textarea>
 
                             <v-textarea 
-                                v-model="eng_desc"
+                                v-model="newType.eng_desc"
                                 label="英文說明"
-                                :rules="[value => eng_desc.length > 0 || !!value || 'Required']"
+                                :rules="[value => newType.eng_desc.length > 0 || !!value || 'Required']"
                                 outlined
                             ></v-textarea>
                         </v-col>
                     </v-row>
 
                     <div class="next_Step_wrapper">
-                        <v-btn color="primary" @click="fieldCheck">Submit</v-btn>                    
+                        <v-btn color="secondary" @click="step = step - 1">Prev</v-btn>                   
+                        <v-btn color="primary" @click="fieldCheck">Submit</v-btn>                   
                     </div>
                 </v-form>
 
@@ -290,22 +293,22 @@ export default {
             img_alert: false,
             newImages: [],
             thumbnails: [],
-            type_name_zh: '',
-            type_name_eng: '',
-            type_acceptable: 1,
-            type_price: 300,
+            newType: {
+                zh_name: '',
+                eng_name: '',
+                acceptable: 0,
+                price: 0,
+                zh_desc: '',
+                eng_desc: '',                
+            },
             variation: [
                 // { zh_name: '', eng_name: '', price: 300, zh_desc: '', eng_desc: '' }
             ],
-            zh_desc: '',
-            eng_desc: '',
             rules: {
-                zh_required: value => this.type_name_zh.length > 0 || !!value || 'Required',
-                eng_required: value => this.type_name_eng.length > 0 || !!value || 'Required',
-                zh_desc_required: value => this.zh_desc.length > 0 || !!value || 'Required',
-                eng_desc_required: value => this.eng_desc.length > 0 || !!value || 'Required',
-                accept: value => this.type_acceptable > 0 || value > 0 || 'Need a number above 0',
-                base_price: value => this.type_price >= 300 || value >= 300 || 'Need a number above 300',
+                zh_required: value => this.newType.zh_name.length > 0 || !!value || 'Required',
+                eng_required: value => this.newType.eng_name.length > 0 || !!value || 'Required',
+                accept: value => this.newType.acceptable > 0 || value > 0 || 'Need a number above 0',
+                base_price: value => this.newType.price > 0 || value > 0 || 'Need a number above 300',
             }
         }
     },
@@ -375,17 +378,18 @@ export default {
                     matchRules = this.$refs.step_3.validate()
                     if(matchRules){
                         let form = new FormData()
-                        form.append('zh_name', this.type_name_zh)
-                        form.append('eng_name', this.type_name_eng)
-                        form.append('acceptable', this.type_acceptable)
-                        form.append('price', this.type_price)
-                        form.append('variations', JSON.stringify(this.variation))
-                        form.append('zh_desc', this.zh_desc)
-                        form.append('eng_desc', this.eng_desc)
 
-                        // for(let i=0; i < this.variation.length; i++){
-                        //     form.append('variation[]', this.variation[i])
-                        // }                        
+                        for(const [key, val] of Object.entries(this.newType)){
+                            form.append(key, val)
+                        }
+
+                        // form.append('zh_name', this.type_name_zh)
+                        // form.append('eng_name', this.type_name_eng)
+                        // form.append('acceptable', this.type_acceptable)
+                        // form.append('price', this.type_price)
+                        form.append('variations', JSON.stringify(this.variation))
+                        // form.append('zh_desc', this.zh_desc)
+                        // form.append('eng_desc', this.eng_desc)
 
                         for(let i=0; i < this.newImages.length; i++){
                             form.append(`files[]`, this.newImages[i])
@@ -393,7 +397,23 @@ export default {
 
                         try {
                             // form submit
-                            await axios.post('/commission/add', form)                            
+                            await axios.post('/commission/add', form)
+                            
+                            // clear value
+                            for(const [key, val] of Object.entries(this.newType)){                                
+                                if(typeof val == 'number') this.newType[key] = 0
+
+                                this.newType[key] = ''
+                            }
+                            this.variation.splice(0)
+                            this.newImages.splice(0)
+                            this.thumbnails.splice(0)
+
+                            // close modal
+                            this.$emit('close')
+
+                            // reset step
+                            this.step = 1
                         } catch (error) {
                             console.log('form_submit_error :>>>', error)   
                         }

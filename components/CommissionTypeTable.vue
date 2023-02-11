@@ -42,6 +42,8 @@
 </template>
 
 <script>
+  // import axios from '../server/axios.ts'
+
   export default {
     data () {
       return {
@@ -61,21 +63,21 @@
           { text: '操作', value: 'control', width: '10%' },
         ],
         types: [
-          {
-            name: 'Grayscal',
-            acceptable: 1,
-            price: 400
-          },
-          {
-            name: 'Grayscal',
-            acceptable: 1,
-            price: 400
-          },
-          {
-            name: 'Grayscal',
-            acceptable: 1,
-            price: 400
-          },
+          // {
+          //   name: 'Grayscal',
+          //   acceptable: 1,
+          //   price: 400
+          // },
+          // {
+          //   name: 'Grayscal',
+          //   acceptable: 1,
+          //   price: 400
+          // },
+          // {
+          //   name: 'Grayscal',
+          //   acceptable: 1,
+          //   price: 400
+          // },
         ],
       }
     },
@@ -91,5 +93,8 @@
         this.addNewType = false
       }
     },
+    created(){
+      this.$store.dispatch('getCommissionType')
+    }
   }
 </script>
